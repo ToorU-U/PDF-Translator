@@ -19,7 +19,8 @@ The terminology table must be used consistently across translated documents.
 ## Rules
 
 - Preserve terminal names and identifiers exactly when they appear as codes.
-- Preserve units such as `V`, `Ah`, `rpm`, `kPa`, `mm2`, and `s`.
-- Preserve protocol names such as `CAN` and `J1939`.
-- Preserve component identifiers such as `B436`, `B401a`, `B406a`, `B647a`, and `B646a`.
-
+- Output documents should prefer `mm²`.
+- Source text may contain `mm2` and should be normalized to `mm²` where appropriate.
+- Preserve other units such as `V`, `Ah`, `rpm`, `kPa`, and `s`.
+- Preserve technical identifiers such as `B436`, `B401a`, `CAN`, and `J1939` exactly.
+- Preserve other component identifiers, terminal names, wire labels, protocol names, and model codes exactly when they appear as technical identifiers.

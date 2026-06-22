@@ -84,11 +84,25 @@ A generated document must fail QA if:
 
 AI agents must not mark an output complete when QA fails.
 
+## Staged Development and Review Gates
+
+Development must proceed in clearly defined stages.
+
+At the end of each stage, AI agents must:
+
+- Stop before starting the next stage.
+- Summarize the completed scope and validation results.
+- Create a commit or PR only when permitted by the repository safety rules below.
+- Wait for ChatGPT review and explicit approval.
+
+The next stage must not begin until the previous stage has passed review.
+
 ## Repository Safety Rules
 
-Do not push changes unless the user explicitly confirms.
+Only commit and push when the user explicitly says "commit and push".
+
+If the user only says "continue", "next step", or "looks good", do not commit or push automatically.
 
 Do not change git remotes unless the user explicitly confirms.
 
 Do not commit generated outputs unless the user explicitly requests it.
-

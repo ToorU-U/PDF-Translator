@@ -17,6 +17,20 @@ PDF / Word input
   -> Final export
 ```
 
+## Three-Stage Delivery Process
+
+### Stage 1: Editable DOCX + Image Export
+
+Extract and translate editable text, reconstruct tables and document structure, generate the editable DOCX, export images requiring translation, and create `image_mapping.json`.
+
+### Stage 2: External Image Translation by ChatGPT
+
+Send the exported images to ChatGPT as a separate workflow. The core program does not translate or modify image pixels.
+
+### Stage 3: Image Backfill + Final QA
+
+Replace the original images with returned English images using `image_mapping.json`, preserve their size and position, run final QA checks, and export the completed document only when QA passes.
+
 ## 1. Input
 
 Supported source formats:
@@ -198,4 +212,3 @@ Final outputs may include:
 - `images_to_translate/`
 
 PDF export may be added later, but DOCX is the primary deliverable.
-
