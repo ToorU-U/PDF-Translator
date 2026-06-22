@@ -18,9 +18,9 @@ PIPELINE_STAGES: tuple[PipelineStage, ...] = (
     PipelineStage.INPUT,
     PipelineStage.PARSER,
     PipelineStage.LAYOUT_ANALYSIS,
+    PipelineStage.IMAGE_EXPORT,
     PipelineStage.TRANSLATION,
     PipelineStage.DOCX_BUILDER,
-    PipelineStage.IMAGE_EXPORT,
     PipelineStage.IMAGE_BACKFILL,
     PipelineStage.VALIDATOR,
 )
@@ -59,8 +59,8 @@ class Pipeline:
         source = SourceDocument(path=input_path)
         parsed = self.parser.parse(source)
         layout = self.parser.analyze_layout(parsed)
+        image_manifest = self.image_exporter.export(layout)
         translated = self.translator.translate(layout)
         docx = self.docx_builder.build(translated)
-        image_manifest = self.image_exporter.export(layout)
         completed_docx = self.image_backfill.backfill(docx, image_manifest)
         return self.validator.validate(completed_docx)
