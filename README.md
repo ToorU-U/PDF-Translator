@@ -28,9 +28,9 @@ Primary output:
 
 ## Current Phase
 
-Phase 1 is project planning and documentation only.
+Milestone 1 establishes the project skeleton, typed module boundaries, CLI entry points, logging configuration, and basic smoke tests.
 
-No translation engine, parser, DOCX generator, image replacement logic, or sample documents are included yet.
+PDF parsing, translation, DOCX generation, image export, image backfill, and document validation remain explicit placeholders. No sample documents are included.
 
 ## Documentation
 
@@ -39,4 +39,3 @@ No translation engine, parser, DOCX generator, image replacement logic, or sampl
 - [AI Rules](docs/AI_RULES.md)
 - [QA Checklist](docs/QA_CHECKLIST.md)
 - [Terminology](docs/TERMINOLOGY.md)
-
