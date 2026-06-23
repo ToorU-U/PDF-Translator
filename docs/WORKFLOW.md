@@ -1,214 +1,89 @@
-# Workflow
+# Project Pipeline
 
-This document defines the intended end-to-end workflow for PDF / Word Technical Translator.
+This document describes the end-to-end processing pipeline and the data passed between its stages.
 
-## Overview
-
-```text
-PDF / Word input
-  -> Text extraction
-  -> Table extraction
-  -> Image export
-  -> Body text translation
-  -> Editable DOCX generation
-  -> ChatGPT image translation
-  -> Image backfill
-  -> QA checks
-  -> Final export
-```
-
-## Three-Stage Delivery Process
-
-### Stage 1: Editable DOCX + Image Export
-
-Extract and translate editable text, reconstruct tables and document structure, generate the editable DOCX, export images requiring translation, and create `image_mapping.json`.
-
-### Stage 2: External Image Translation by ChatGPT
-
-Send the exported images to ChatGPT as a separate workflow. The core program does not translate or modify image pixels.
-
-### Stage 3: Image Backfill + Final QA
-
-Replace the original images with returned English images using `image_mapping.json`, preserve their size and position, run final QA checks, and export the completed document only when QA passes.
-
-## 1. Input
-
-Supported source formats:
-
-- PDF
-- Word DOCX
-
-The source document should be treated as the authoritative layout reference.
-
-The pipeline must not assume that every document has the same structure.
-
-## 2. Text Extraction
-
-The parser extracts:
-
-- Body text
-- Headings
-- Numbered lists
-- Page headers
-- Page footers
-- Captions
-- Notes
-- Technical terms
-
-Each text block should retain:
-
-- Source page number
-- Bounding box or logical position
-- Original text
-- Detected role, if known
-
-Example roles:
-
-- `title`
-- `heading_1`
-- `heading_2`
-- `paragraph`
-- `caption`
-- `header`
-- `footer`
-- `table_cell`
-
-## 3. Table Extraction
-
-Tables should be detected and represented as structured data.
-
-The output should preserve:
-
-- Row order
-- Column order
-- Cell text
-- Header rows
-- Merged cells, where feasible
-
-Tables should be regenerated as Word tables whenever possible.
-
-## 4. Image Export
-
-All meaningful images must be exported as independent image files.
-
-Images containing Chinese labels must be copied into:
+## Pipeline Overview
 
 ```text
-images_to_translate/
+PDF or DOCX source
+  -> source ingestion
+  -> content extraction
+  -> document model
+  -> body-text translation
+  -> editable DOCX generation
+  -> image export and mapping
+  -> external image translation
+  -> image backfill
+  -> quality validation
+  -> final export
 ```
 
-The program must also generate:
+## Stage 1: Source Ingestion
 
-```text
-image_mapping.json
-```
+The pipeline accepts a PDF or DOCX source and records source-level metadata. The source remains the layout and content reference for later reconstruction and validation.
 
-The image mapping records:
+- **Input:** source file
+- **Output:** normalized source metadata and page or section access
 
-- Image ID
-- Source page number
-- Source file path
-- Image purpose
-- Insert-back location in Word
-- Original width and height
-- Expected translated image filename
+## Stage 2: Content Extraction
 
-## 5. Body Text Translation
+The parser extracts text blocks, headings, lists, captions, headers, footers, tables, and images. Extracted elements retain source positions, page references, and detected semantic roles when available.
 
-Only editable text is translated in this stage.
+- **Input:** normalized source
+- **Output:** extracted content and layout metadata
 
-The translation module must:
+## Stage 3: Document Model Assembly
 
-- Translate Chinese body text into English.
-- Preserve numbering.
-- Preserve units.
-- Preserve model names.
-- Preserve terminal numbers.
-- Preserve wire labels.
-- Preserve protocol names.
-- Use the project terminology table.
+Extracted elements are normalized into an ordered, structured document model. Table cells, hierarchy, numbering, image references, and layout relationships are represented independently of the final output format.
 
-The translation module must not:
+- **Input:** extracted content
+- **Output:** structured document model
 
-- Translate image pixels.
-- OCR image annotations.
-- Cover or redraw image labels.
+## Stage 4: Body-text Translation
 
-## 6. Editable DOCX Generation
+Editable Chinese text is translated into English while technical identifiers, numbering, units, model names, terminal numbers, wire labels, and protocol names are preserved. Terminology from `docs/TERMINOLOGY.md` is applied here.
 
-The DOCX generator creates:
+- **Input:** structured document model
+- **Output:** translated document model
 
-- Word paragraphs for body text.
-- Word Heading styles for headings.
-- Word tables for tables.
-- Independent Word image objects for images.
-- Headers and footers where feasible.
+## Stage 5: Editable DOCX Generation
 
-The first-stage DOCX uses original exported images, even if they still contain Chinese labels.
+The generator creates native Word paragraphs, heading styles, lists, tables, headers, footers, and independent image objects from the translated model. Original images are used until translated replacements are available.
 
-Image translation is handled later.
+- **Input:** translated document model and source images
+- **Output:** `translated_editable.docx`
 
-## 7. ChatGPT Image Translation
+## Stage 6: Image Export and Mapping
 
-Images in `images_to_translate/` are sent to ChatGPT or another image workflow separately.
+Images requiring translated labels are exported to `images_to_translate/`. Each exported asset receives an entry in `image_mapping.json` containing its identifier, source reference, insertion target, dimensions, and expected replacement filename.
 
-That external workflow is responsible for:
+- **Input:** document model and extracted images
+- **Output:** `images_to_translate/` and `image_mapping.json`
 
-- Translating Chinese labels inside images.
-- Preserving original image resolution.
-- Preserving original annotation style.
-- Preserving arrows, bubbles, borders, and layout.
-- Returning replacement English images.
+## Stage 7: External Image Translation
 
-Expected replacement folder:
+An external image workflow translates labels while preserving the visual layout and returns replacement assets to `images_translated/`. This stage runs outside the core application.
 
-```text
-images_translated/
-```
+- **Input:** `images_to_translate/`
+- **Output:** `images_translated/`
 
-## 8. Image Backfill
+## Stage 8: Image Backfill
 
-The image backfill module reads:
+The backfill stage matches returned assets through `image_mapping.json` and replaces the corresponding Word image objects while retaining their recorded size, position, and aspect ratio. Missing replacements are reported.
 
-- `translated_editable.docx`
-- `image_mapping.json`
-- `images_translated/`
+- **Input:** `translated_editable.docx`, `image_mapping.json`, and `images_translated/`
+- **Output:** `translated_editable_with_images.docx` and backfill results
 
-It replaces each original image with the translated version when available.
+## Stage 9: Quality Validation
 
-Requirements:
+Automated checks evaluate editable text, structure, tables, images, residual Chinese text, and mapping completeness according to `docs/QA_CHECKLIST.md`. Failed checks block final export and produce diagnostic results.
 
-- Preserve image size.
-- Preserve image position.
-- Preserve aspect ratio.
-- Do not disturb nearby text.
-- Report missing translated images.
+- **Input:** generated document, mappings, and processing metrics
+- **Output:** validation status and `translation_report.md`
 
-## 9. QA Checks
+## Stage 10: Final Export
 
-Before final export, the project must run automated quality checks.
+After validation passes, the pipeline packages the completed editable document, report, mappings, and relevant image assets as the final result.
 
-Checks include:
-
-- Editable text character count.
-- Paragraph count.
-- Heading count.
-- Table count.
-- Image count.
-- Full-page image detection.
-- Chinese text residual detection.
-- Image mapping completeness.
-
-If QA fails, the final export must be blocked.
-
-## 10. Final Export
-
-Final outputs may include:
-
-- `translated_editable.docx`
-- `translated_editable_with_images.docx`
-- `translation_report.md`
-- `image_mapping.json`
-- `images_to_translate/`
-
-PDF export may be added later, but DOCX is the primary deliverable.
+- **Input:** validated outputs
+- **Output:** final delivery package
