@@ -2,6 +2,15 @@
 
 This file defines how AI agents collaborate on this repository. Project requirements and architecture belong in `docs/`.
 
+## Required Reading
+
+For any task that modifies code, prompts, workflows, generated document logic, QA behavior, terminology handling, or documentation responsibilities, read:
+
+- `docs/PROJECT_GUIDELINES.md`
+- `docs/WORKFLOW.md`
+- `docs/QA_CHECKLIST.md`
+- `docs/TERMINOLOGY.md`
+
 ## Git Workflow
 
 - Inspect `git status` and relevant diffs before editing or staging.
@@ -46,7 +55,7 @@ This file defines how AI agents collaborate on this repository. Project requirem
 
 ### Start
 
-- [ ] Read the repository documentation relevant to the task.
+- [ ] Complete the [Required Reading](#required-reading) for any task within its stated scope.
 - [ ] Inspect the current branch, working tree, and recent history.
 - [ ] Confirm the requested scope and identify unrelated local changes.
 
