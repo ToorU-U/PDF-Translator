@@ -36,6 +36,6 @@ PDF parsing, translation, DOCX generation, image export, image backfill, and doc
 
 - [Project Guidelines](docs/PROJECT_GUIDELINES.md)
 - [Workflow](docs/WORKFLOW.md)
-- [AI Rules](docs/AI_RULES.md)
+- [Agent Development Guide](AGENTS.md)
 - [QA Checklist](docs/QA_CHECKLIST.md)
 - [Terminology](docs/TERMINOLOGY.md)

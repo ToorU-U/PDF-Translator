@@ -1,96 +1,37 @@
 # Project Guidelines
 
-## Project Objective
+## Project Goal
 
-PDF / Word Technical Translator is a general-purpose tool for converting Chinese technical documents into professional, editable English DOCX files.
+Build a reusable technical-document translation system that converts Chinese PDF and Word sources into professional, editable English Word documents while preserving their meaning, structure, and practical usability.
 
-The final document must behave like a real Word document, not like a collection of page screenshots.
+The project serves technical manuals, engineering documents, installation guides, service instructions, and similar structured documents. It is a general-purpose product rather than a workspace tailored to one customer file.
 
-## Target Users
+## Design Philosophy
 
-The project is intended for workflows involving:
+- **Editability first:** The result should behave like a native Word document, not a collection of page images.
+- **Preserve intent and structure:** Translation must retain hierarchy, numbering, units, identifiers, tables, figures, and document order wherever feasible.
+- **Separate concerns:** Parsing, translation, document reconstruction, image handling, and quality assurance remain independent responsibilities.
+- **Traceable transformation:** Extracted content and layout decisions should retain enough source context to support validation and later correction.
+- **Quality is a gate:** Outputs that do not satisfy editability, completeness, or translation checks are not final deliverables.
+- **Generic by default:** New capabilities should generalize across document types instead of encoding assumptions from a single sample.
 
-- Technical manuals
-- Installation guides
-- Electrical system documents
-- Engineering work instructions
-- Product service documents
-- Maintenance procedures
-- Wiring and control documentation
+## Architecture Principles
 
-## Required Outputs
+- Represent document content as structured data before generating output formats.
+- Preserve semantic roles such as headings, paragraphs, lists, captions, table cells, headers, and footers.
+- Reconstruct text and tables as native editable Word elements whenever feasible.
+- Keep images as independent assets with stable identifiers and recorded placement metadata.
+- Isolate external image translation from the core text-processing pipeline and support deterministic replacement afterward.
+- Define typed, testable boundaries between pipeline stages.
+- Make validation an explicit pipeline stage that can block final export.
+- Prefer observable processing with reports, counts, mappings, and actionable failure information.
 
-The standard first-stage output must include:
+## Long-term Objectives
 
-- `translated_editable.docx`
-- `translation_report.md`
-- `images_to_translate/`
-- `image_mapping.json`
-
-The optional second-stage output, after translated images are returned, may include:
-
-- `translated_editable_with_images.docx`
-- `updated_translation_report.md`
-
-## Core Principles
-
-1. The Word document must be editable.
-2. Body text must be generated as Word paragraphs.
-3. Headings must use Word Heading styles.
-4. Tables must be generated as Word tables where feasible.
-5. Images must be independent Word image objects.
-6. Image translation must be handled outside the core program.
-7. The program must export images and record their insertion positions.
-8. The program must support replacing images later without changing layout.
-9. Quality checks must run before final export.
-
-## Forbidden Practices
-
-The following are not allowed:
-
-- Converting every PDF page into a bitmap image and inserting it into Word.
-- Using full-page screenshots as the primary DOCX content.
-- Flattening body text into images.
-- Flattening tables into images when a Word table is feasible.
-- Directly editing, OCR-covering, redrawing, or translating image annotations inside the core pipeline.
-- Moving images, tables, or text without recording the layout change.
-- Exporting a DOCX with near-zero editable text.
-- Treating a single customer document as the permanent project structure.
-
-## DOCX Output Standard
-
-The generated DOCX must support:
-
-- Selecting body text.
-- Copying body text.
-- Searching body text.
-- Editing wording.
-- Changing fonts and styles.
-- Editing Word tables.
-- Moving or replacing images as independent objects.
-
-The generated DOCX should preserve:
-
-- Heading hierarchy.
-- Numbering.
-- Units.
-- Terminal numbers.
-- Figure order.
-- Table order.
-- Approximate original layout.
-- Page headers and footers where feasible.
-
-## Image Policy
-
-Images are not translated by the core pipeline.
-
-For images that contain Chinese labels or annotations, the program must:
-
-- Export the image at the highest available resolution.
-- Put it into `images_to_translate/`.
-- Create a mapping entry in `image_mapping.json`.
-- Insert the original image into the first-stage DOCX.
-- Wait for a translated replacement image.
-
-The image replacement module may later replace the original image with an English version while preserving size and position.
-
+- Support varied technical PDF and DOCX sources without document-specific code paths.
+- Improve layout fidelity while preserving editability and maintainability.
+- Expand extraction and reconstruction support for complex tables, headers, footers, captions, and numbering.
+- Maintain consistent technical terminology across documents and domains.
+- Enable reliable resumable processing and replacement of externally translated visual assets.
+- Add broader automated validation, regression fixtures, and measurable quality benchmarks.
+- Support additional export formats only when they do not compromise the primary editable-document workflow.
