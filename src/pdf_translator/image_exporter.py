@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from pdf_translator.models import ImageExportManifest, LayoutDocument
+from pdf_translator.models import Document, ImageExportManifest
 
 
 class ImageExporter:
     """Export original images and record their future replacement locations."""
 
-    def export(self, document: LayoutDocument) -> ImageExportManifest:
+    def export(self, document: Document) -> ImageExportManifest:
         """Export images without OCR, translation, redrawing, or pixel edits."""
 
         raise NotImplementedError("Image export is not implemented.")
