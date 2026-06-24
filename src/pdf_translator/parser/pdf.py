@@ -2,14 +2,23 @@
 
 from __future__ import annotations
 
-from pdf_translator.models import Document, SourceDocument
+import fitz
+
+from pdf_translator.models import Document, Page, Paragraph, SourceDocument, TextRun
 from pdf_translator.parser.base import DocumentParser
 
 
 class PdfDocumentParser(DocumentParser):
-    """Create the minimal document model for a PDF source."""
+    """Extract plain text from a PDF into the shared document model."""
 
     def parse(self, source: SourceDocument) -> Document:
-        """Return an empty document until PDF extraction is implemented."""
+        """Create one plain-text paragraph for each non-empty PDF page."""
 
-        return Document(source=source)
+        with fitz.open(source.path) as pdf:
+            pages = []
+            for page in pdf:
+                text = page.get_text()
+                content = (Paragraph(runs=(TextRun(text=text),)),) if text else ()
+                pages.append(Page(index=page.number, content=content))
+
+        return Document(source=source, pages=tuple(pages))

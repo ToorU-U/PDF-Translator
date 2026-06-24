@@ -12,6 +12,8 @@ from pdf_translator.exceptions import UnsupportedDocumentError
 from pdf_translator.models import PipelineStage
 from pdf_translator.pipeline import Pipeline
 
+PDF_FIXTURE = Path(__file__).parent / "fixtures" / "plain_text.pdf"
+
 
 class PipelineTests(unittest.TestCase):
     def test_pipeline_declares_complete_stage_order(self) -> None:
@@ -33,7 +35,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_unimplemented_pipeline_stops_at_layout_analysis(self) -> None:
         with self.assertRaisesRegex(NotImplementedError, "Layout analysis"):
-            Pipeline().run(Path("input.pdf"))
+            Pipeline().run(PDF_FIXTURE)
 
     def test_pipeline_rejects_unsupported_source_extension(self) -> None:
         with self.assertRaisesRegex(
