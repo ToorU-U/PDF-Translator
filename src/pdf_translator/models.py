@@ -40,14 +40,6 @@ class BoundingBox:
 
 
 @dataclass(frozen=True, slots=True)
-class ReadingOrder:
-    """Record an element's position in a page's logical reading sequence."""
-
-    index: int
-    group: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
 class Metadata:
     """Store document-level descriptive and source metadata."""
 
@@ -56,9 +48,6 @@ class Metadata:
     subject: str | None = None
     keywords: tuple[str, ...] = ()
     language: str | None = None
-    created_at: str | None = None
-    modified_at: str | None = None
-    properties: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,7 +62,6 @@ class TextRun:
     bold: bool = False
     italic: bool = False
     underline: bool = False
-    color: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -82,8 +70,6 @@ class Paragraph:
 
     runs: tuple[TextRun, ...] = ()
     bounding_box: BoundingBox | None = None
-    reading_order: ReadingOrder | None = None
-    style_name: str | None = None
     list_label: str | None = None
 
 
@@ -94,9 +80,7 @@ class Heading:
     level: int
     runs: tuple[TextRun, ...] = ()
     bounding_box: BoundingBox | None = None
-    reading_order: ReadingOrder | None = None
     numbering: str | None = None
-    style_name: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,8 +88,7 @@ class Image:
     """Represent an independent image asset and its source-page placement."""
 
     image_id: str
-    bounding_box: BoundingBox
-    reading_order: ReadingOrder | None = None
+    bounding_box: BoundingBox | None = None
     asset_path: Path | None = None
     mime_type: str | None = None
     alt_text: str | None = None
@@ -123,7 +106,6 @@ class TableCell:
     bounding_box: BoundingBox | None = None
     row_span: int = 1
     column_span: int = 1
-    is_header: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -132,7 +114,6 @@ class Table:
 
     rows: tuple[tuple[TableCell, ...], ...] = ()
     bounding_box: BoundingBox | None = None
-    reading_order: ReadingOrder | None = None
     caption: Paragraph | None = None
     header_row_count: int = 0
 
@@ -146,7 +127,6 @@ class Header:
 
     content: tuple[RegionContent, ...] = ()
     bounding_box: BoundingBox | None = None
-    reading_order: ReadingOrder | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -155,7 +135,6 @@ class Footer:
 
     content: tuple[RegionContent, ...] = ()
     bounding_box: BoundingBox | None = None
-    reading_order: ReadingOrder | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -165,7 +144,6 @@ class PageNumber:
     runs: tuple[TextRun, ...] = ()
     value: int | None = None
     bounding_box: BoundingBox | None = None
-    reading_order: ReadingOrder | None = None
 
 
 PageContent: TypeAlias = Paragraph | Heading | Table | Image
@@ -173,7 +151,7 @@ PageContent: TypeAlias = Paragraph | Heading | Table | Image
 
 @dataclass(frozen=True, slots=True)
 class Page:
-    """Represent one source page and its logically ordered content regions."""
+    """Represent a source page whose content tuple defines reading order."""
 
     index: int
     content: tuple[PageContent, ...] = ()
