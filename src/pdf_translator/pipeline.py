@@ -9,7 +9,7 @@ from pdf_translator.docx_builder import DocxBuilder
 from pdf_translator.image_backfill import ImageBackfill
 from pdf_translator.image_exporter import ImageExporter
 from pdf_translator.models import PipelineStage, SourceDocument, ValidationReport
-from pdf_translator.parser import DocumentParser
+from pdf_translator.parser import DocumentParser, select_parser
 from pdf_translator.translator import DocumentTranslator
 from pdf_translator.validator import DocumentValidator
 
@@ -40,7 +40,7 @@ class Pipeline:
         validator: DocumentValidator | None = None,
     ) -> None:
         self.config = config or AppConfig()
-        self.parser = parser or DocumentParser()
+        self.parser = parser
         self.translator = translator or DocumentTranslator()
         self.docx_builder = docx_builder or DocxBuilder()
         self.image_exporter = image_exporter or ImageExporter()
@@ -57,8 +57,9 @@ class Pipeline:
         """Execute the declared stage order once implementations are available."""
 
         source = SourceDocument(path=input_path)
-        parsed = self.parser.parse(source)
-        layout = self.parser.analyze_layout(parsed)
+        parser = self.parser or select_parser(source)
+        parsed = parser.parse(source)
+        layout = parser.analyze_layout(parsed)
         image_manifest = self.image_exporter.export(layout)
         translated = self.translator.translate(layout)
         docx = self.docx_builder.build(translated)
