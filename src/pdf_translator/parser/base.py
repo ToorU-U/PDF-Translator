@@ -1,4 +1,4 @@
-"""Document parsing and layout-analysis interfaces."""
+"""Shared document parser interface."""
 
 from __future__ import annotations
 
